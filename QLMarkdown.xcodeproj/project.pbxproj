@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		830277F42C60B3B40066EBCC /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 83CF71D82C60ADA60066A195 /* icon.png */; };
 		830277F52C60B3E20066EBCC /* default.css in Resources */ = {isa = PBXBuildFile; fileRef = 83598F22258263C0004664D3 /* default.css */; };
-		830277F62C60B3EA0066EBCC /* stats.html in Resources */ = {isa = PBXBuildFile; fileRef = 83CF71D62C60AB300066A195 /* stats.html */; };
 		830277F72C60E48F0066EBCC /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 83CF71D82C60ADA60066A195 /* icon.png */; };
 		830B160A2D274F180042D876 /* QLMarkdownXPCHelper.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = 83C8C1802D272CA200FBB33F /* QLMarkdownXPCHelper.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		830B5B3C272D68E500378FFE /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 830B5B3B272D68E500378FFE /* SwiftSoup */; };
@@ -745,7 +744,6 @@
 		83CF71CD2C60023E0066A195 /* sup_ext.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = sup_ext.c; sourceTree = "<group>"; };
 		83CF71D12C6005370066A195 /* sub_ext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sub_ext.h; sourceTree = "<group>"; };
 		83CF71D22C60053A0066A195 /* sub_ext.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sub_ext.c; sourceTree = "<group>"; };
-		83CF71D62C60AB300066A195 /* stats.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = stats.html; sourceTree = "<group>"; };
 		83CF71D82C60ADA60066A195 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		83CF71DB2C60ADA60066A195 /* main_interface.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = main_interface.png; sourceTree = "<group>"; };
 		83CF71DC2C60ADA60066A195 /* preview-screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "preview-screenshot.png"; sourceTree = "<group>"; };
@@ -1194,7 +1192,6 @@
 			children = (
 				83598F22258263C0004664D3 /* default.css */,
 				83E7FEF0258FBF37003ECF9B /* highlight */,
-				83CF71D62C60AB300066A195 /* stats.html */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1605,7 +1602,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				830277F42C60B3B40066EBCC /* icon.png in Resources */,
-				830277F62C60B3EA0066EBCC /* stats.html in Resources */,
 				831A8C47258ABADA00E36182 /* PreviewViewController.xib in Resources */,
 				834A4F0329E8AD8C00692964 /* ext_scanners.re in Resources */,
 			);
@@ -2160,6 +2156,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/cmark-gfm/src\"",
@@ -2203,6 +2200,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/cmark-gfm/src\"",
@@ -2247,6 +2245,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/cmark-gfm/src\"",
@@ -2297,6 +2296,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/cmark-gfm/src\"",
@@ -2343,6 +2343,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/cmark-gfm/src\"",
@@ -2384,6 +2385,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/cmark-gfm/src\"",
@@ -2585,6 +2587,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/highlight-wrapper\"",
@@ -2635,6 +2638,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/highlight-wrapper\"",
@@ -2715,6 +2719,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/highlight-wrapper\"",
@@ -2763,6 +2768,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/QLMarkdown",
 					"\"$(SRCROOT)/cmark-extra\"",
 					"\"$(SRCROOT)/cmark-extra/extensions\"",
 					"\"$(SRCROOT)/highlight-wrapper\"",

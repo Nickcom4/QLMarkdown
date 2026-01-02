@@ -76,9 +76,7 @@ class Settings: Codable {
         case openInlineLink
         
         case renderAsCode
-        
-        case useLegacyPreview
-        
+
         case qlWindowWidth
         case qlWindowHeight
         
@@ -91,10 +89,26 @@ class Settings: Codable {
     }()
     static let factorySettings = Settings(noInitFromDefault: true)
     static var appBundleUrl: URL?
+
+    /// Cached default CSS from bundle (loaded once, never changes)
+    private static var _cachedDefaultCSS: String?
+    static var cachedDefaultCSS: String? {
+        if _cachedDefaultCSS == nil {
+            if let bundle = Settings.appBundleUrl != nil ? Bundle(url: Settings.appBundleUrl!) : Bundle.main,
+               let p = bundle.path(forResource: "default", ofType: "css"),
+               let data = FileManager.default.contents(atPath: p),
+               let s = String(data: data, encoding: .utf8) {
+                _cachedDefaultCSS = s
+            }
+        }
+        return _cachedDefaultCSS
+    }
     
     static var isLightAppearance: Bool {
         get {
-            return UserDefaults.standard.string(forKey: "AppleInterfaceStyle") ?? "Light" == "Light"
+            // Read from global defaults domain to work in both app and XPC helper
+            let isDark = UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)?["AppleInterfaceStyle"] as? String == "Dark"
+            return !isDark
         }
     }
     
@@ -144,19 +158,6 @@ class Settings: Codable {
     
     @objc var renderAsCode: Bool = false
     
-    var renderStats: Int {
-        get {
-            return UserDefaults.standard.integer(forKey: "ql-markdown-render-count");
-        }
-        set {
-            // print("Rendered \(newValue) files.")
-            UserDefaults.standard.setValue(newValue, forKey: "ql-markdown-render-count")
-            UserDefaults.standard.synchronize();
-        }
-    }
-    
-    var useLegacyPreview: Bool = false
-    
     /// Quick Look window width.
     var qlWindowWidth: Int? = nil
     /// Quick Look window height.
@@ -187,7 +188,6 @@ class Settings: Codable {
         } else {
             title += "QLMarkdown</a>"
         }
-        title += ".<br/>\nIf you like this app, <a href='https://www.buymeacoffee.com/sbarex'><strong>buy me a coffee</strong></a>!"
         return title
     }
     
@@ -259,9 +259,7 @@ class Settings: Codable {
         self.openInlineLink = try container.decode(Bool.self, forKey: .openInlineLink)
     
         self.renderAsCode = try container.decode(Bool.self, forKey: .renderAsCode)
-    
-        self.useLegacyPreview = try container.decode(Bool.self, forKey: .useLegacyPreview)
-    
+
         self.qlWindowWidth = try container.decode(Int?.self, forKey: .qlWindowWidth)
         self.qlWindowHeight = try container.decode(Int?.self, forKey: .qlWindowHeight)
     
@@ -322,8 +320,7 @@ class Settings: Codable {
         try container.encode(self.customCSSOverride, forKey: .customCSSOverride)
         try container.encode(self.openInlineLink, forKey: .openInlineLink)
         try container.encode(self.renderAsCode, forKey: .renderAsCode)
-        
-        try container.encode(self.useLegacyPreview, forKey: .useLegacyPreview)
+
         try container.encode(self.qlWindowWidth, forKey: .qlWindowWidth)
         try container.encode(self.qlWindowHeight, forKey: .qlWindowHeight)
         try container.encode(self.about, forKey: .about)
@@ -348,6 +345,8 @@ class Settings: Codable {
     @objc func handleSettingsChanged(_ notification: NSNotification) {
         // print("settings changed")
         self.initFromDefaults()
+        // Invalidate custom CSS cache to ensure it's re-fetched on next render
+        self.customCSSFetched = false
     }
     
     func initFromDefaults() {
@@ -408,8 +407,6 @@ class Settings: Codable {
         
         self.qlWindowWidth = s.qlWindowWidth
         self.qlWindowHeight = s.qlWindowHeight
-        
-        self.useLegacyPreview = false
     }
     
     func update(from defaultsDomain: [String: Any]) {
@@ -559,10 +556,6 @@ class Settings: Codable {
             qlWindowHeight = nil
         }
         
-        if let opt = defaultsDomain["legacy-preview"] as? Bool {
-            useLegacyPreview = opt
-        }
-
         sanitizeEmojiOption()
     }
     

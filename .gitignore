@@ -25,3 +25,14 @@ highlight-wrapper/file-5.46/tests/Makefile
 /*/.idea/
 
 *.dSYM
+
+# Generated build files
+QLMarkdown/config.h
+ltmain.sh
+
+# Autotools generated files in dependencies
+dependencies/pcre2/configure
+dependencies/pcre2/Makefile.in
+dependencies/pcre2/aclocal.m4
+dependencies/pcre2/autom4te.cache/
+dependencies/pcre2/build-aux/

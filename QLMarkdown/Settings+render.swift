@@ -10,14 +10,70 @@ import OSLog
 import SwiftSoup
 import Yams
 
+/// Pre-compiled regex for YAML header extraction
+private let yamlHeaderRegex: NSRegularExpression? = {
+    // Pattern: Match YAML header content between --- and --- or ...
+    // (?s): dot matches newlines
+    // (?<=---\n): positive lookbehind for opening ---
+    // .*?: non-greedy match of content
+    // (?>\n(?:---|\\.\\.\\.)\n): closing --- or ... followed by newline
+    try? NSRegularExpression(pattern: "(?s)((?<=---\n).*?(?>\n(?:---|\\.\\.\\.)\n))", options: [])
+}()
+
+/// Cache for cmark extension pointers to avoid repeated lookups
+private struct CmarkExtensionCache {
+    static var isInitialized = false
+
+    static var table: OpaquePointer?
+    static var autolink: OpaquePointer?
+    static var tagfilter: OpaquePointer?
+    static var tasklist: OpaquePointer?
+    static var strikethrough: OpaquePointer?
+    static var mention: OpaquePointer?
+    static var heads: OpaquePointer?
+    static var highlight: OpaquePointer?
+    static var sub: OpaquePointer?
+    static var sup: OpaquePointer?
+    static var inlineimage: OpaquePointer?
+    static var emoji: OpaquePointer?
+    static var math: OpaquePointer?
+    static var syntaxhighlight: OpaquePointer?
+
+    static func ensureInitialized() {
+        guard !isInitialized else { return }
+
+        // Register extensions first
+        cmark_gfm_core_extensions_ensure_registered()
+        cmark_gfm_extra_extensions_ensure_registered()
+
+        // Cache all extension pointers
+        table = cmark_find_syntax_extension("table")
+        autolink = cmark_find_syntax_extension("autolink")
+        tagfilter = cmark_find_syntax_extension("tagfilter")
+        tasklist = cmark_find_syntax_extension("tasklist")
+        strikethrough = cmark_find_syntax_extension("strikethrough")
+        mention = cmark_find_syntax_extension("mention")
+        heads = cmark_find_syntax_extension("heads")
+        highlight = cmark_find_syntax_extension("highlight")
+        sub = cmark_find_syntax_extension("sub")
+        sup = cmark_find_syntax_extension("sup")
+        inlineimage = cmark_find_syntax_extension("inlineimage")
+        emoji = cmark_find_syntax_extension("emoji")
+        math = cmark_find_syntax_extension("math")
+        syntaxhighlight = cmark_find_syntax_extension("syntaxhighlight")
+
+        isInitialized = true
+    }
+}
+
 extension Settings {
     func render(text: String, filename: String, forAppearance appearance: Appearance, baseDir: String) throws -> String {
         if self.renderAsCode, let code = self.renderCode(text: text, forAppearance: appearance, baseDir: baseDir) {
             return code
         }
-        
-        cmark_gfm_core_extensions_ensure_registered()
-        cmark_gfm_extra_extensions_ensure_registered()
+
+        // Ensure extensions are registered and cached
+        CmarkExtensionCache.ensureInitialized()
         
         var options = CMARK_OPT_DEFAULT
         if self.unsafeHTMLOption {
@@ -62,35 +118,34 @@ extension Settings {
         */
         
         if self.tableExtension {
-            if let ext = cmark_find_syntax_extension("table") {
+            if let ext = CmarkExtensionCache.table {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown markdown `table` extension.", log: OSLog.rendering, type: .debug)
-                // extensions = cmark_llist_append(cmark_get_default_mem_allocator(), nil, &ext)
             } else {
                 os_log("Could not enable markdown `table` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.autoLinkExtension {
-            if let ext = cmark_find_syntax_extension("autolink") {
+            if let ext = CmarkExtensionCache.autolink {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown `autolink` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `autolink` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.tagFilterExtension {
-            if let ext = cmark_find_syntax_extension("tagfilter") {
+            if let ext = CmarkExtensionCache.tagfilter {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown `tagfilter` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `tagfilter` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.taskListExtension {
-            if let ext = cmark_find_syntax_extension("tasklist") {
+            if let ext = CmarkExtensionCache.tasklist {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown `tasklist` extension.",  log: OSLog.rendering, type: .debug)
             } else {
@@ -103,14 +158,10 @@ extension Settings {
         var header = ""
         
         if self.yamlExtension && (self.yamlExtensionAll || filename.lowercased().hasSuffix("rmd") || filename.lowercased().hasSuffix("qmd")) && md_text.hasPrefix("---") {
-            /*
-             (?s): Turn on "dot matches newline" for the remainder of the regular expression. For “single line mode” makes the dot match all characters, including line breaks.
-             (?<=---\n): Positive lookbehind. Matches at a position if the pattern inside the lookbehind can be matched ending at that position. Find expression .* where expression `---\n` precedes.
-             (?>\n(?:---|\.\.\.):
-             (?:---|\.\.\.): not capturing group
-             */
-            let pattern = "(?s)((?<=---\n).*?(?>\n(?:---|\\.\\.\\.)\n))"
-            if let range = md_text.range(of: pattern, options: .regularExpression) {
+            // Use pre-compiled regex for YAML header extraction
+            if let regex = yamlHeaderRegex,
+               let match = regex.firstMatch(in: md_text, options: [], range: NSRange(md_text.startIndex..., in: md_text)),
+               let range = Range(match.range, in: md_text) {
                 let yaml = String(md_text[range.lowerBound ..< md_text.index(range.upperBound, offsetBy: -4)])
                 var isHTML = false
                 header = self.renderYamlHeader(yaml, isHTML: &isHTML)
@@ -124,74 +175,61 @@ extension Settings {
         }
         
         if self.strikethroughExtension {
-            if let ext = cmark_find_syntax_extension("strikethrough") {
+            if let ext = CmarkExtensionCache.strikethrough {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown `strikethrough` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `strikethrough` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.mentionExtension {
-            if let ext = cmark_find_syntax_extension("mention") {
+            if let ext = CmarkExtensionCache.mention {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown `mention` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `mention` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.headsExtension {
-            if let ext = cmark_find_syntax_extension("heads") {
+            if let ext = CmarkExtensionCache.heads {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown `heads` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `heads` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.highlightExtension {
-            if let ext = cmark_find_syntax_extension("highlight") {
+            if let ext = CmarkExtensionCache.highlight {
                 cmark_parser_attach_syntax_extension(parser, ext)
-                
-                os_log(
-                    "Enabled markdown `highlight` extension.",
-                    log: OSLog.rendering,
-                    type: .debug)
+                os_log("Enabled markdown `highlight` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `highlight` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
-        
+
         if self.subExtension {
-            if let ext = cmark_find_syntax_extension("sub") {
+            if let ext = CmarkExtensionCache.sub {
                 cmark_parser_attach_syntax_extension(parser, ext)
-                
-                os_log(
-                    "Enabled markdown `sub` extension.",
-                    log: OSLog.rendering,
-                    type: .debug)
+                os_log("Enabled markdown `sub` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `sub` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.supExtension {
-            if let ext = cmark_find_syntax_extension("sup") {
+            if let ext = CmarkExtensionCache.sup {
                 cmark_parser_attach_syntax_extension(parser, ext)
-                
-                os_log(
-                    "Enabled markdown `sup` extension.",
-                    log: OSLog.rendering,
-                    type: .debug)
+                os_log("Enabled markdown `sup` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `sup` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.inlineImageExtension {
-            if let ext = cmark_find_syntax_extension("inlineimage") {
+            if let ext = CmarkExtensionCache.inlineimage {
                 cmark_parser_attach_syntax_extension(parser, ext)
                 cmark_syntax_extension_inlineimage_set_wd(ext, baseDir.cString(using: .utf8))
                 cmark_syntax_extension_inlineimage_set_mime_callback(ext, { (path, context) in
@@ -296,7 +334,7 @@ extension Settings {
         }
         
         if self.emojiExtension {
-            if let ext = cmark_find_syntax_extension("emoji") {
+            if let ext = CmarkExtensionCache.emoji {
                 cmark_syntax_extension_emoji_set_use_characters(ext, !self.emojiImageOption)
                 cmark_parser_attach_syntax_extension(parser, ext)
                 os_log("Enabled markdown `emoji` extension using %{public}s.", log: OSLog.rendering, type: .debug, self.emojiImageOption ? "images" : "glyphs")
@@ -304,22 +342,18 @@ extension Settings {
                 os_log("Could not enable markdown `emoji` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.mathExtension {
-            if let ext = cmark_find_syntax_extension("math") {
+            if let ext = CmarkExtensionCache.math {
                 cmark_parser_attach_syntax_extension(parser, ext)
-                
-                os_log(
-                    "Enabled markdown `math` extension.",
-                    log: OSLog.rendering,
-                    type: .debug)
+                os_log("Enabled markdown `math` extension.", log: OSLog.rendering, type: .debug)
             } else {
                 os_log("Could not enable markdown `math` extension!", log: OSLog.rendering, type: .error)
             }
         }
-        
+
         if self.syntaxHighlightExtension {
-            if let ext = cmark_find_syntax_extension("syntaxhighlight") {
+            if let ext = CmarkExtensionCache.syntaxhighlight {
                 if let path = getHighlightSupportPath() {
                     cmark_syntax_highlight_init("\(path)/".cString(using: .utf8))
                 } else {
@@ -422,7 +456,7 @@ table.debug td {
         
         html_debug += "<tr><td>autolink extension</td><td>"
         if self.autoLinkExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("autolink") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.autolink == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -430,7 +464,7 @@ table.debug td {
         
         html_debug += "<tr><td>emoji extension</td><td>"
         if self.emojiExtension {
-            html_debug += "on" + (cmark_find_syntax_extension("emoji") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on" + (CmarkExtensionCache.emoji == nil ? " (NOT AVAILABLE" : "")
             html_debug += " / \(self.emojiImageOption ? "using images" : "using emoji")"
         } else {
             html_debug += "off"
@@ -441,7 +475,7 @@ table.debug td {
         
         html_debug += "<tr><td>highlight extension</td><td>"
         if self.highlightExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("highlight") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.highlight == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -449,7 +483,7 @@ table.debug td {
         
         html_debug += "<tr><td>inlineimage extension</td><td>"
         if self.inlineImageExtension {
-            html_debug += "on" + (cmark_find_syntax_extension("inlineimage") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on" + (CmarkExtensionCache.inlineimage == nil ? " (NOT AVAILABLE" : "")
             html_debug += "<br />basedir: \(baseDir)"
         } else {
             html_debug += "off"
@@ -458,7 +492,7 @@ table.debug td {
         
         html_debug += "<tr><td>math extension</td><td>"
         if self.mathExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("math") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.math == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -466,7 +500,7 @@ table.debug td {
         
         html_debug += "<tr><td>mention extension</td><td>"
         if self.mentionExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("mention") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.mention == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -474,7 +508,7 @@ table.debug td {
         
         html_debug += "<tr><td>strikethrough extension</td><td>"
         if self.strikethroughExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("strikethrough") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.strikethrough == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -482,7 +516,7 @@ table.debug td {
         
         html_debug += "<tr><td>syntax highlighting extension</td><td>"
         if self.syntaxHighlightExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("syntaxhighlight") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.syntaxhighlight == nil ? " (NOT AVAILABLE" : "")
             
             html_debug += "<table>\n"
             html_debug += "<tr><td>datadir</td><td>\(getHighlightSupportPath() ?? "missing")</td></tr>\n"
@@ -511,14 +545,14 @@ table.debug td {
         
         html_debug += "<tr><td>sub extension</td><td>"
         if self.subExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("sub") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.sub == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
         html_debug += "</td></tr>\n"
         html_debug += "<tr><td>sup extension</td><td>"
         if self.supExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("sup") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.sup == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -526,7 +560,7 @@ table.debug td {
         
         html_debug += "<tr><td>table extension</td><td>"
         if self.tableExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("table") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.table == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -534,7 +568,7 @@ table.debug td {
         
         html_debug += "<tr><td>tagfilter extension</td><td>"
         if self.tagFilterExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("tagfilter") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.tagfilter == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -542,7 +576,7 @@ table.debug td {
 
         html_debug += "<tr><td>tasklist extension</td><td>"
         if self.taskListExtension {
-            html_debug += "on " + (cmark_find_syntax_extension("tasklist") == nil ? " (NOT AVAILABLE" : "")
+            html_debug += "on " + (CmarkExtensionCache.tasklist == nil ? " (NOT AVAILABLE" : "")
         } else {
             html_debug += "off"
         }
@@ -633,15 +667,14 @@ table.debug td {
             if !css.isEmpty {
                 css_doc_extended = formatCSS(css)
                 if !self.customCSSOverride {
-                    css_doc = formatCSS(getBundleContents(forResource: "default", ofType: "css"))
+                    css_doc = formatCSS(Settings.cachedDefaultCSS)
                 } else {
                     css_doc = ""
                 }
             } else {
                 css_doc_extended = ""
-                css_doc = formatCSS(getBundleContents(forResource: "default", ofType: "css"))
+                css_doc = formatCSS(Settings.cachedDefaultCSS)
             }
-            // css_doc = "<style type=\"text/css\">\n\(css_doc)\n</style>\n"
         } else {
             css_doc_extended = ""
             css_doc = ""
@@ -660,7 +693,7 @@ table.debug td {
             if exit_code == EXIT_SUCCESS, let p = p {
                 css_highlight = String(cString: p) + "\n"
             }
-        } else if self.syntaxHighlightExtension, let ext = cmark_find_syntax_extension("syntaxhighlight"), cmark_syntax_extension_highlight_get_rendered_count(ext) > 0 {
+        } else if self.syntaxHighlightExtension, let ext = CmarkExtensionCache.syntaxhighlight, cmark_syntax_extension_highlight_get_rendered_count(ext) > 0 {
             let theme = ""
             if !theme.isEmpty, let p = cmark_syntax_extension_get_style(ext) {
                 // Embed the theme style.
@@ -688,7 +721,7 @@ table.debug td {
         }
         css_highlight = formatCSS(css_highlight)
         
-        if !self.renderAsCode, self.mathExtension, let ext = cmark_find_syntax_extension("math"), cmark_syntax_extension_math_get_rendered_count(ext) > 0 || body.contains("$") {
+        if !self.renderAsCode, self.mathExtension, let ext = CmarkExtensionCache.math, cmark_syntax_extension_math_get_rendered_count(ext) > 0 || body.contains("$") {
             s_header += """
 <script type="text/javascript">
 MathJax = {

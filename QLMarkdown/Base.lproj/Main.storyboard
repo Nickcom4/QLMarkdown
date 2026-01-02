@@ -75,12 +75,6 @@
                                                 <action selector="revealCLITool:" target="Voe-Tx-rLC" id="a9e-gM-h4J"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Buy me a coffee…" id="cHz-XF-UAt">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="buyMeACoffee:" target="Ady-hI-5gd" id="SB1-Ng-Bb0"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                                         <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW"/>
                                         <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
@@ -768,16 +762,9 @@
                             <allowedToolbarItems>
                                 <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="OkB-Ti-gMh"/>
                                 <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="6pH-Qf-g7v"/>
-                                <toolbarItem implicitItemIdentifier="D6465400-1A21-458E-AAE1-53943BDD0C27" label="Buy me a coffee" paletteLabel="Buy me a coffee" tag="-1" sizingBehavior="auto" id="the-Rm-DRx">
-                                    <imageReference key="image" image="cup.and.saucer" catalog="system" symbolScale="large"/>
-                                    <connections>
-                                        <action selector="buyMeACoffee:" target="Oky-zY-oP4" id="b19-xY-Uuw"/>
-                                    </connections>
-                                </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
                                 <toolbarItem reference="6pH-Qf-g7v"/>
-                                <toolbarItem reference="the-Rm-DRx"/>
                             </defaultToolbarItems>
                         </toolbar>
                         <connections>
@@ -2144,30 +2131,17 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vtU-YO-TAi">
-                                <rect key="frame" x="13" y="212" width="381" height="32"/>
-                                <buttonCell key="cell" type="push" title="If you like this application and find it useful, buy me a ☕️!" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="esx-ic-ADn">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="buyMeACoffee:" target="bdx-fe-T4t" id="rIH-Dc-sK8"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="vtU-YO-TAi" firstAttribute="leading" secondItem="tGB-AZ-NgW" secondAttribute="leading" constant="20" symbolic="YES" id="28N-0L-tGY"/>
                             <constraint firstItem="XK0-jd-qqx" firstAttribute="centerX" secondItem="Bfq-db-PX4" secondAttribute="centerX" id="2Xh-IJ-3lc"/>
                             <constraint firstItem="J1e-rg-hJz" firstAttribute="top" secondItem="XK0-jd-qqx" secondAttribute="bottom" constant="8" symbolic="YES" id="6Tn-Gs-4S4"/>
                             <constraint firstItem="Bfq-db-PX4" firstAttribute="top" secondItem="tGB-AZ-NgW" secondAttribute="top" id="GgX-aM-aX9"/>
                             <constraint firstAttribute="trailing" secondItem="3wW-8y-niQ" secondAttribute="trailing" id="LoX-UO-q7x"/>
                             <constraint firstAttribute="bottom" secondItem="3wW-8y-niQ" secondAttribute="bottom" id="VUf-5p-pz6"/>
-                            <constraint firstAttribute="trailing" secondItem="vtU-YO-TAi" secondAttribute="trailing" constant="20" symbolic="YES" id="byS-D9-kv7"/>
                             <constraint firstItem="Bfq-db-PX4" firstAttribute="centerX" secondItem="tGB-AZ-NgW" secondAttribute="centerX" id="ejV-kb-iJ8"/>
-                            <constraint firstItem="fPO-E1-Kd7" firstAttribute="top" secondItem="vtU-YO-TAi" secondAttribute="bottom" constant="20" symbolic="YES" id="eq2-eY-R7v"/>
+                            <constraint firstItem="3wW-8y-niQ" firstAttribute="top" secondItem="gHa-vC-czD" secondAttribute="bottom" constant="20" symbolic="YES" id="eq2-eY-R7v"/>
                             <constraint firstItem="XK0-jd-qqx" firstAttribute="top" secondItem="Bfq-db-PX4" secondAttribute="bottom" constant="8" symbolic="YES" id="gfg-7G-fEI"/>
                             <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="XK0-jd-qqx" secondAttribute="trailing" constant="20" symbolic="YES" id="ipT-ki-NHB"/>
-                            <constraint firstItem="vtU-YO-TAi" firstAttribute="top" secondItem="gHa-vC-czD" secondAttribute="bottom" constant="20" symbolic="YES" id="q61-4f-V6p"/>
                             <constraint firstItem="XK0-jd-qqx" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="tGB-AZ-NgW" secondAttribute="leading" constant="20" symbolic="YES" id="qOu-t3-kAt"/>
                             <constraint firstItem="gHa-vC-czD" firstAttribute="top" secondItem="J1e-rg-hJz" secondAttribute="bottom" constant="8" symbolic="YES" id="sPr-rY-3tk"/>
                             <constraint firstItem="3wW-8y-niQ" firstAttribute="leading" secondItem="tGB-AZ-NgW" secondAttribute="leading" id="suV-qO-CaL"/>

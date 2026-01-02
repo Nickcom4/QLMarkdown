@@ -163,6 +163,7 @@ article {
   line-height: 1.5;
   word-wrap: break-word;
   padding: 32px;
+  overflow-x: hidden;
 }
 
 a {
@@ -439,8 +440,16 @@ input[type="checkbox"] {
 .markdown-body img {
   max-width: 100%;
   height: auto;
-  box-sizing: initial;
+  box-sizing: border-box;
   background-color: var(--background);
+  object-fit: contain;
+}
+
+/* Ensure images in paragraphs don't overflow */
+.markdown-body p img {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
 }
 
 .markdown-body img[align=right] {
