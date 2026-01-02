@@ -167,7 +167,8 @@ class Settings: Codable {
         if let w = qlWindowWidth, w > 0, let h = qlWindowHeight, h > 0 {
             return CGSize(width: CGFloat(w), height: CGFloat(h))
         } else {
-            return CGSize(width: 0, height: 0)
+            // Default to document width (902px content + 64px padding) x reasonable height
+            return CGSize(width: 966, height: 1200)
         }
     }
     

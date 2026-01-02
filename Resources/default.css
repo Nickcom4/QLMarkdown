@@ -150,7 +150,7 @@ body {
 @media (min-width: 902px) {
   article {
     border-radius: 8px;
-    border-width: 1px;  
+    border-width: 1px;
     border-style: solid;
     border-color: var(--body-border-color);
   }
