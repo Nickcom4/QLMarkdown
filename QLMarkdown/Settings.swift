@@ -175,36 +175,11 @@ class Settings: Codable {
     @objc var about: Bool = true
     
     var app_version: String {
-        var title: String = "<a href='https://github.com/nickcom4/QLMarkdown'>";
-        if let info = Bundle.main.infoDictionary {
-            title += (info["CFBundleExecutable"] as? String ?? "QLMarkdown") + "</a>"
-            if let version = info["CFBundleShortVersionString"] as? String,
-                let build = info["CFBundleVersion"] as? String {
-                title += ", version \(version) (\(build))"
-            }
-            if let copy = info["NSHumanReadableCopyright"] as? String {
-                title += ".<br />\n\(copy.trimmingCharacters(in: CharacterSet(charactersIn: ". ")) + " with <span style='font-style: normal'>❤️</span>")"
-            }
-        } else {
-            title += "QLMarkdown</a>"
-        }
-        return title
+        return "Forked from <a href='https://github.com/sbarex/QLMarkdown'>sbarex/QLMarkdown</a> → <a href='https://github.com/nickcom4/QLMarkdown'>github.com/nickcom4/QLMarkdown</a> with <span style='font-style: normal'>❤️</span>"
     }
     
     var app_version2: String {
-        var title: String = "<!--\n\nFile generated with QLMarkdown [https://github.com/nickcom4/QLMarkdown] - ";
-        if let info = Bundle.main.infoDictionary {
-            title += (info["CFBundleExecutable"] as? String ?? "QLMarkdown")
-            if let version = info["CFBundleShortVersionString"] as? String,
-                let build = info["CFBundleVersion"] as? String {
-                title += ", version \(version) (\(build))"
-            }
-            if let copy = info["NSHumanReadableCopyright"] as? String {
-                title += ".\n\(copy.trimmingCharacters(in: CharacterSet(charactersIn: ". ")) + " with ❤️")"
-            }
-        }
-        title += "\n\n-->\n"
-        return title
+        return "<!--\n\nForked from sbarex/QLMarkdown → github.com/nickcom4/QLMarkdown with ❤️\n\n-->\n"
     }
     
     lazy fileprivate(set) var resourceBundle: Bundle = {
