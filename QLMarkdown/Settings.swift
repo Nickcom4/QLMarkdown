@@ -175,7 +175,7 @@ class Settings: Codable {
     @objc var about: Bool = true
     
     var app_version: String {
-        var title: String = "<a href='https://github.com/sbarex/QLMarkdown'>";
+        var title: String = "<a href='https://github.com/nickcom4/QLMarkdown'>";
         if let info = Bundle.main.infoDictionary {
             title += (info["CFBundleExecutable"] as? String ?? "QLMarkdown") + "</a>"
             if let version = info["CFBundleShortVersionString"] as? String,
@@ -192,7 +192,7 @@ class Settings: Codable {
     }
     
     var app_version2: String {
-        var title: String = "<!--\n\nFile generated with QLMarkdown [https://github.com/sbarex/QLMarkdown] - ";
+        var title: String = "<!--\n\nFile generated with QLMarkdown [https://github.com/nickcom4/QLMarkdown] - ";
         if let info = Bundle.main.infoDictionary {
             title += (info["CFBundleExecutable"] as? String ?? "QLMarkdown")
             if let version = info["CFBundleShortVersionString"] as? String,
