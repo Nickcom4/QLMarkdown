@@ -83,7 +83,7 @@
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://sbarex.github.io/QLMarkdown/appcast.xml</string>
+	<string>https://nickcom4.github.io/QLMarkdown/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>J+ikFQXeR6eaUV0jvyfZAJKeYh+9UKGJuD/kJSIXnZk=</string>
 	<key>SUScheduledCheckInterval</key>

@@ -47,7 +47,7 @@ You can download the last compiled release (as universal binary) from [this link
 
 ## Installation
 
-You can download the last compiled release (as universal binary) from [this link](https://github.com/sbarex/QLMarkdown/releases) or you can install the Application with [Homebrew](https://brew.sh/):   
+You can download the last compiled release (as universal binary) from [this link](https://github.com/nickcom4/QLMarkdown/releases) or you can install the Application with [Homebrew](https://brew.sh/):   
 
 ```shell
 brew install --cask qlmarkdown
